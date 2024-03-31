@@ -10,8 +10,9 @@ palavra = ''
 for i, arg in enumerate(sys.argv[1:], start=1):  #
     if arg == '-help':
         print('Forma de usar:')
-        print('python afd-main.py [arquivo.json] -rec \'string\'')
-        print('python afd-main.py [arquivo.json] -graphviz')
+        print('python afd-main.py [afd.json] -rec \'string\'')
+        print('python afd-main.py [afd.json] -graphviz')
+        print('python afd-main.py [afd.json] -graphviz \'string\'')
         exit(0)
     elif arg.endswith('.json') and af is None:
         with open(arg, "r", encoding="utf-8") as f:
