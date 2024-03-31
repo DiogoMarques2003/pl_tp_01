@@ -63,8 +63,10 @@ def reconhece(palavra: str):
             # Se não há transição definida, a palavra não é reconhecida.
             return f"'{palavra}' não é reconhecida\n[transição ({estadoAtual}->{simboloAtual}) não definida]"
 
-    # Verifica se o estado atual é um dos estados finais
+    # gerar a string do caminho percorrido
     caminhoFormatado = '->'.join(caminho)
+
+    # Verifica se o estado atual é um dos estados finais
     if estadoAtual in F:
         return f"'{palavra}' é reconhecida\n[caminho {caminhoFormatado}]"
     else:
