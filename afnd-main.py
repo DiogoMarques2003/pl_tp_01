@@ -25,7 +25,7 @@ for i, arg in enumerate(sys.argv[1:], start=1):
         caminhoAFD = arg
 
 if afnd is None:
-    print("Não passasste o arquivo do afd como argumento")
+    print("Não passasste o arquivo do afnd como argumento")
     exit(-1)
 
 if graphviz == False and caminhoAFD == '':
@@ -43,7 +43,62 @@ F = set(afnd["F"])
 
 # Converter o AFND para AFD
 def convertAFNDtoAFD(caminho: str):
-    print("teste")
+    # Iniciar as variáveis
+    simbolos = V
+    estadoInicial = q0
+    estados = [estadoInicial]
+    transicoes = {}
+    estadosFinais = []
+
+    # Adicionar o estado inicial a fila
+    fila = [estadoInicial]
+
+    # Enquanto a fila tiver dados continuar o loop
+    while len(fila) != 0:
+        # Pegar no 1º dado da fila
+        estadoAtual = fila.pop()
+
+        for simbolo in simbolos:
+            novoEstado = set()
+            estadosVerificar = estadoAtual.split(',')
+
+            # Verificar se os estados estão nas transições do AFND, se tiver adicionar ao novoEstado o simbolo
+            for estado in estadosVerificar:
+                if estado in delta and simbolo in delta[estado]:
+                    novoEstado.update(delta[estado][simbolo])
+
+            # Gerar o novo estado juntando as todos os simbolos por ","
+            novoEstado = ','.join(sorted(novoEstado))
+            # Se existir novoEstado e o mesmo não estiver nos estados adicionar a fila e aos estados
+            if novoEstado and novoEstado not in estados:
+                estados.append(novoEstado)
+                fila.append(novoEstado)
+
+            # Se o estado atual não estiver nas transições criar um json vazio para esse estado
+            if estadoAtual not in transicoes:
+                transicoes[estadoAtual] = {}
+            # Adicionar o novo estado ao simbolo
+            transicoes[estadoAtual][simbolo] = novoEstado
+
+            # Se o novo estado for um estado final e ainda não tiver no array de estados finais adicionar
+            if any(estadoFinal in novoEstado for estadoFinal in F):
+                if novoEstado not in estadosFinais:
+                    estadosFinais.append(novoEstado)
+
+    # Gerar o json do AFD
+    afd = {
+        "V": list(simbolos),
+        "Q": estados,
+        "delta": transicoes,
+        "q0": estadoInicial,
+        "F": estadosFinais
+    }
+
+    # Salvar o arquivo
+    f = open(caminho, "w")
+    json.dump(afd, f, indent=4)
+    f.close()
+    print("Arquivo gerado com sucesso!")
 
 
 # Gerar o grafico graphviz
