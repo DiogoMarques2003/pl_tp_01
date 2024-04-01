@@ -7,7 +7,7 @@ graphvizPath = ''
 palavra = ''
 
 # Ignorar o nome do arquivo dos args e ler os outros parametros
-for i, arg in enumerate(sys.argv[1:], start=1):  #
+for i, arg in enumerate(sys.argv[1:], start=1):
     if arg == '-help':
         print('Forma de usar:')
         print('python afd-main.py [afd.json] -rec \'string\'')
@@ -83,17 +83,17 @@ def graphviz_gen(caminho: str):
     graphviz_str += "\tinitial -> " + q0 + ";\n"  # Defenir o ponto inicial
 
     # Percorrer os itens do delta e adicionar
-    for atual, proximo in delta.items():
+    for estado, transicoes in delta.items():
         graphviz_str += "\t"
-        for simbolo, proximoSimbolo in proximo.items():
-            graphviz_str += "" + atual + " -> " + proximoSimbolo + " [label=\"" + simbolo + "\"]; "
+        for simbolo, estadoDestino in transicoes.items():
+            graphviz_str += "" + estado + " -> " + estadoDestino + " [label=\"" + simbolo + "\"]; "
         graphviz_str += "\n"
 
     # Fechar arquivo
     graphviz_str += "}"
 
     if caminho == '':
-        print(caminho)
+        print(graphviz_str)
     else:
         f = open(caminho, "w")
         f.write(graphviz_str)

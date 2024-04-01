@@ -5,7 +5,7 @@ er = None
 arquivoSalvar = ''
 
 # Ignorar o nome do arquivo dos args e ler os outros parametros
-for i, arg in enumerate(sys.argv[1:], start=1):  #
+for i, arg in enumerate(sys.argv[1:], start=1):
     if arg == '-help':
         print('Forma de usar:')
         print('python er-main.py [er.json] --output \'string\'')
@@ -13,7 +13,7 @@ for i, arg in enumerate(sys.argv[1:], start=1):  #
     elif arg.endswith('.json') and er is None:
         with open(arg, "r", encoding="utf-8") as f:
             er = json.load(f)
-    elif sys.argv[i - 1] == '--output':
+    elif sys.argv[i - 1] == '--output' and (not arg.startswith('-') and arg.endswith('.json')):
         arquivoSalvar = arg
 
 
