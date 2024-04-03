@@ -45,7 +45,7 @@ F = set(af["F"])
 # palavra é reconhecida reconhecida no Autómato AF
 def reconhece(palavra: str):
     estadoAtual = q0  # começar pelo estado inicial!
-    caminho = [estadoAtual]  # para armazenar o caminho percorrido
+    caminho = []  # para armazenar o caminho percorrido
     tam = len(palavra)  # tamanho da palavra a reconhecer
     i = 0
     while (i < tam):
@@ -54,17 +54,18 @@ def reconhece(palavra: str):
         if simboloAtual not in V:
             return f"'{simboloAtual}' não é reconhecida\n[símbolo '{simboloAtual}' não pertence ao alfabeto]"
 
+        caminho.append(f"{estadoAtual}-{simboloAtual}")  # adiciona o estado ao caminho
+
         # Verifica se há uma transição definida para o estado atual e o símbolo atual
         if simboloAtual in delta[estadoAtual]:
             estadoAtual = delta[estadoAtual][simboloAtual]
-            caminho.append(estadoAtual)  # adiciona o estado ao caminho
             i += 1
         else:
             # Se não há transição definida, a palavra não é reconhecida.
             return f"'{palavra}' não é reconhecida\n[transição ({estadoAtual}->{simboloAtual}) não definida]"
 
     # gerar a string do caminho percorrido
-    caminhoFormatado = '->'.join(caminho)
+    caminhoFormatado = f"{' > '.join(caminho)} > {estadoAtual}"
 
     # Verifica se o estado atual é um dos estados finais
     if estadoAtual in F:
