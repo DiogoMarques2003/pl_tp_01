@@ -8,7 +8,7 @@ arquivoSalvar = ''
 for i, arg in enumerate(sys.argv[1:], start=1):
     if arg == '-help':
         print('Forma de usar:')
-        print('python er-main.py [er.json] --output \'string\'')
+        print('python er_main.py [er.json] --output \'string\'')
         exit(0)
     elif arg.endswith('.json') and er is None:
         with open(arg, "r", encoding="utf-8") as f:

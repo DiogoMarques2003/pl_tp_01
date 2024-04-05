@@ -10,9 +10,9 @@ caminhoAFD = ''
 for i, arg in enumerate(sys.argv[1:], start=1):
     if arg == '-help':
         print('Forma de usar:')
-        print('python afnd-main.py [afnd.json] -output \'string\'')
-        print('python afnd-main.py [afnd.json] -graphviz')
-        print('python afnd-main.py [afnd.json] -graphviz \'string\'')
+        print('python afnd_main.py [afnd.json] -output \'string\'')
+        print('python afnd_main.py [afnd.json] -graphviz')
+        print('python afnd_main.py [afnd.json] -graphviz \'string\'')
         exit(0)
     elif arg.endswith('.json') and afnd is None:
         with open(arg, "r", encoding="utf-8") as f:
