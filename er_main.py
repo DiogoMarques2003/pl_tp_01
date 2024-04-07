@@ -38,12 +38,12 @@ def prcSimbolo(simbolo, simbolos, estados, transicoes):
     inicio = novoEstado(estados)
     fim = novoEstado(estados)
 
-    print(simbolos)
-    # Adicionar a transição
+    # Adicionar a transição do estado inicial para o estado final com o símbolo
     transicoes[inicio] = {simbolo: [fim]}
     # Validar se o simbolo já se encontra na lista, se não tiver adicionar
     if simbolo not in simbolos:
         simbolos.append(simbolo)
+
     # Retornar o estado de inicio e sim
     return inicio, fim
 
@@ -53,21 +53,30 @@ def prcEpsilon(estados, transicoes):
     # Criar os estados para inicio e fim da transição
     inicio = novoEstado(estados)
     fim = novoEstado(estados)
-    # Adicionar a transição
+
+    # Adicionar a transição epsilion do estado inicial para o final
     transicoes[inicio] = {'': [fim]}
+
     # Retornar o estado de inicio e sim
     return inicio, fim
 
 
 # Função para processar o "op" = "alt" (alternância, "|")
 def prcAlt(args, estados, simbolos, transicoes):
-    # Criar os estados para inicio e fim da transição
+    # Criar os estados para inicio e fim globais da transição
     inicio = novoEstado(estados)
     fim = novoEstado(estados)
-    # Para cada item dos args chamar a função converterER
+
     for arg in args:
+        # Converter cada argumento
         subInicio, subFim = converterER(arg, estados, simbolos, transicoes)
+
+        # Adicionar a transição '' do estado de inicio global para o inicio de cada argumento
+        # Isto permite que o processamento da palavra seja iniciado a partir de qualquer um dos argumentos
         transicoes.setdefault(inicio, {}).setdefault('', []).append(subInicio)  # Se não existir vai adicionar uma propriadade { 'inicio': { '': ['subInicio'] } }, senão da so append
+
+        # Adiciona a transição do fim de cada argumento para o fim global
+        # Isto permite que se possa passar para o estado final da operação ALT
         transicoes.setdefault(subFim, {}).setdefault('', []).append(fim)  # Se não existir vai adicionar uma propriadade { 'subFim': { '': ['fim'] } }, senão da so append
     # Devolver o estado de inicio e fim
     return inicio, fim
@@ -76,15 +85,19 @@ def prcAlt(args, estados, simbolos, transicoes):
 def prcSeq(args, estados, simbolos, transicoes):
     fimAnterior = None
     inicio = None
-    # Para cada item dos args chamar a função converterER
+
     for arg in args:
+        # Converter cada arg
         subInicio, subFim = converterER(arg, estados, simbolos, transicoes)
-        # Caso já tenha um estado anterior adicionar as transições
+
+        # Se já tivermos processado algum arg então conectamos o fim do ultimo arg com o início do atual
         if fimAnterior:
+            # Adicionar a transição do fim do arg anterior para o inicio do atual
             transicoes.setdefault(fimAnterior, {}).setdefault('', []).append(subInicio) # Se não existir vai adicionar uma propriadade { 'fimAnterior': { '': ['subInicio'] } }, senão da so append
-        # Senão dizer que o inicio vai ser o subInicio
         else:
+            # Se é o primeiro arg a ser processado defenimos o início dele como início da operação seq
             inicio = subInicio
+
         # Trocar o valor do ultimo estado final
         fimAnterior = subFim
     # Retornar o 1º inicio criado e o ultimo fim
@@ -95,19 +108,49 @@ def prcKle(args, estados, simbolos, transicoes):
     # Criar os estados para inicio e fim da transição
     inicio = novoEstado(estados)
     fim = novoEstado(estados)
-    # Processar o arg que tem (como o KLE é fecho so vai ter um arg)
-    subInicio, subFim = converterER(args[0], estados, simbolos, transicoes)
-    # Adicionar as transições
-    transicoes.setdefault(inicio, {}).setdefault('', []).append(subInicio) # Se não existir vai adicionar uma propriadade { 'inicio': { '': ['subInicio'] } }, senão da so append
-    transicoes.setdefault(inicio, {}).setdefault('', []).append(fim) # Se não existir vai adicionar uma propriadade { 'inicio': { '': ['fim'] } }, senão da so append
-    transicoes.setdefault(subFim, {}).setdefault('', []).append(subInicio) # Se não existir vai adicionar uma propriadade { 'subFim': { '': ['subInicio'] } }, senão da so append
-    transicoes.setdefault(subFim, {}).setdefault('', []).append(fim) # Se não existir vai adicionar uma propriadade { 'subFim': { '': ['fim'] } }, senão da so append
+
+    # Adiciona transição de epsilon do início global para o fim global para permitir reconhecimento de uma cadeia vazia
+    transicoes.setdefault(inicio, {}).setdefault('', []).append(fim)  # Se não existir vai adicionar uma propriadade { 'inicio': { '': ['fim'] } }, senão da so append
+
+    for arg in args:
+        # Processar o arg que tem
+        subInicio, subFim = converterER(arg, estados, simbolos, transicoes)
+
+        # Transição do estado inicial para o estado inicial do arg, permitindo que o arg seja iniciado
+        transicoes.setdefault(inicio, {}).setdefault('', []).append(subInicio) # Se não existir vai adicionar uma propriadade { 'inicio': { '': ['subInicio'] } }, senão da so append
+
+        # Transição do estado final do arg de volta ao seu estado inicial, permitindo a remetição do arg
+        transicoes.setdefault(subFim, {}).setdefault('', []).append(subInicio) # Se não existir vai adicionar uma propriadade { 'subFim': { '': ['subInicio'] } }, senão da so append
+
+        # Transição do final do arg para o estado final do fecho de kleene, permitindo a saida do arg após a conclusão do mesmo
+        transicoes.setdefault(subFim, {}).setdefault('', []).append(fim) # Se não existir vai adicionar uma propriadade { 'subFim': { '': ['fim'] } }, senão da so append
+
     # Retornar o inicio e fim do Kle
     return inicio, fim
 
+
 # Função para processar o "op" = "trans" (fecho transitivo, simbolo+)
 def prcTrans(args, estados, simbolos, transicoes):
-    print("aqui")
+    # Criar os estados para inicio e fim da transição
+    inicio = novoEstado(estados)
+    fim = novoEstado(estados)
+
+    for arg in args:
+        # Processar cada argumento dentro do fecho transitivo
+        subInicio, subFim = converterER(arg, estados, simbolos, transicoes)
+
+        # Adicionar a transição do estado inicial para o estado inicial do arg, permitindo que o arg seja iniciado
+        transicoes.setdefault(inicio, {}).setdefault('', []).append(subInicio) # Se não existir vai adicionar uma propriadade { 'inicio': { '': ['subInicio'] } }, senão da so append
+
+        # Transição do estado final do arg de volta ao seu estado inicial, obrigando a que ocorra pelo menos uma vez ou mais
+        transicoes.setdefault(subFim, {}).setdefault('', []).append(subInicio) # Se não existir vai adicionar uma propriadade { 'subFim': { '': ['subInicio'] } }, senão da so append
+
+        # Transição do final do arg para o estado final do fecho de tansitivo, permitindo a saida do arg após o realizar 1 vez ou mais
+        transicoes.setdefault(subFim, {}).setdefault('', []).append(fim) # Se não existir vai adicionar uma propriadade { 'subFim': { '': ['fim'] } }, senão da so append
+
+    # Retornar o inicio e fim do fecho transitivo
+    return inicio, fim
+
 
 # Função para verificar para onde o er atual deve ir
 def converterER(er, estados, simbolos, transicoes):
@@ -147,11 +190,9 @@ def convertERToAFND(caminho: str):
     }
 
     # Salvar o arquivo
-    f = open(caminho, "w")
-    json.dump(afnd, f, indent=4)
-    f.close()
+    with open(caminho, "w") as f:
+        json.dump(afnd, f, indent=4)
     print("Arquivo gerado com sucesso!")
-
 
 if arquivoSalvar != '':
     convertERToAFND(arquivoSalvar)

@@ -43,33 +43,37 @@ F = set(afnd["F"])
 
 # Converter o AFND para AFD
 def convertAFNDtoAFD(caminho: str):
-    # Iniciar as variáveis
-    simbolos = V
-    estadoInicial = q0
-    estados = [estadoInicial]
-    transicoes = {}
-    estadosFinais = []
+    # Iniciar as variáveis para construir o AFD
+    simbolos = V # Símbolos do alfabeto
+    estadoInicial = q0 # Estado inicial
+    estados = [estadoInicial] # Listado dos estados
+    transicoes = {} # Transições que constituem o AFD
+    estadosFinais = [] # Lista dos estados finais
 
-    # Adicionar o estado inicial a fila
+    # Usa uma fila para controlar os estados a serem processados
     fila = [estadoInicial]
 
     # Enquanto a fila tiver dados continuar o loop
     while len(fila) != 0:
-        # Pegar no 1º dado da fila
+        # Remove e retorna o primeiro estado da fila
         estadoAtual = fila.pop()
 
+        # Para cada símbolo do alfabeto, tentar construir as transições do estado atual
         for simbolo in simbolos:
+            # Conjunto para armazenar os estados utilizados pelo símbolo atual
             novoEstado = set()
+            # Divide o estado atual nos seus componentes, por ex se tivermos o estado q1,q2 vamos ter os componentes q1 e q2
             estadosVerificar = estadoAtual.split(',')
 
-            # Verificar se os estados estão nas transições do AFND, se tiver adicionar ao novoEstado o simbolo
+            # Verifica as transições para cada componente do estado atual no AFND
             for estado in estadosVerificar:
                 if estado in delta and simbolo in delta[estado]:
                     novoEstado.update(delta[estado][simbolo])
 
             # Gerar o novo estado juntando as todos os simbolos por ","
             novoEstado = ','.join(sorted(novoEstado))
-            # Se existir novoEstado e o mesmo não estiver nos estados adicionar a fila e aos estados
+
+            # Se o novo estado for válido e ainda não estiver adicionado vai adicionar o mesmo a lista de estados e a fila para ser processado
             if novoEstado and novoEstado not in estados:
                 estados.append(novoEstado)
                 fila.append(novoEstado)
@@ -77,10 +81,11 @@ def convertAFNDtoAFD(caminho: str):
             # Se o estado atual não estiver nas transições criar um json vazio para esse estado
             if estadoAtual not in transicoes:
                 transicoes[estadoAtual] = {}
-            # Adicionar o novo estado ao simbolo
+
+            # Adiciona a transição do estado atual para o novo estado com símbolo atual
             transicoes[estadoAtual][simbolo] = novoEstado
 
-            # Se o novo estado for um estado final e ainda não tiver no array de estados finais adicionar
+            # Verifica se o novo estado contém algum estado final do AFND, se tiver adicionar o novo estado aos estados finais
             if any(estadoFinal in novoEstado for estadoFinal in F):
                 if novoEstado not in estadosFinais:
                     estadosFinais.append(novoEstado)
@@ -95,9 +100,8 @@ def convertAFNDtoAFD(caminho: str):
     }
 
     # Salvar o arquivo
-    f = open(caminho, "w")
-    json.dump(afd, f, indent=4)
-    f.close()
+    with open(caminho, "w") as f:
+        json.dump(afd, f, indent=4)
     print("Arquivo gerado com sucesso!")
 
 
