@@ -121,7 +121,7 @@ def convertAFNDtoAFD(caminho: str):
         "V": list(simbolos),
         "Q": estados,
         "delta": transicoes,
-        "q0": '_'.join(estadosIniciais), # O novo estado inicial caso o afnd comece por um epsilon pode ser diferente
+        "q0": '_'.join(sorted(estadosIniciais)), # O novo estado inicial caso o afnd comece por um epsilon pode ser diferente
         "F": estadosFinais
     }
 
