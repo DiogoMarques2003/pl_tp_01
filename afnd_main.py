@@ -40,6 +40,24 @@ delta = afnd["delta"]
 q0 = afnd["q0"]
 F = set(afnd["F"])
 
+# Suporte para epsilion
+def fechoEpsilon(estado):
+    fecho = [estado]
+    fila = [estado]
+
+    print(estado)
+
+    while len(fila) != 0:
+        estadoAtual = fila.pop()
+        # Processar a transição epsilon do estado atual
+        if '' in delta[estadoAtual]:
+            for proximoEstado in delta[estadoAtual]['']:
+                if proximoEstado not in fecho:
+                    fecho.append(proximoEstado)
+                    fila.append(proximoEstado)
+    
+    return fecho
+
 
 # Converter o AFND para AFD
 def convertAFNDtoAFD(caminho: str):
@@ -51,36 +69,34 @@ def convertAFNDtoAFD(caminho: str):
     estadosFinais = [] # Lista dos estados finais
 
     # Usa uma fila para controlar os estados a serem processados
-    fila = [estadoInicial]
+    estadosIniciais = fechoEpsilon(estadoInicial)
+    fila = ['_'.join(sorted(estadosIniciais))]
 
-    # Enquanto a fila tiver dados continuar o loop
     while len(fila) != 0:
-        # Remove e retorna o primeiro estado da fila
         estadoAtual = fila.pop()
+        estadosAtuais = estadoAtual.split('_')
 
-        # Para cada símbolo do alfabeto, tentar construir as transições do estado atual
+        # Verificar se algum estado atual é estado final do AFND
+        if any(f in estadosAtuais for f in F):
+            if estadoAtual not in estadosFinais:
+                estadosFinais.append(estadoAtual)
+
+        # Processar cada simbolo do alfabeto exceto o epsilon
         for simbolo in simbolos:
-            # Conjunto para armazenar os estados utilizados pelo símbolo atual
-            novoEstado = set()
-            # Divide o estado atual nos seus componentes, por ex se tivermos o estado q1_q2 vamos ter os componentes q1 e q2
-            estadosVerificar = estadoAtual.split('_')
-
+            novosEstados = set()
             # Verifica as transições para cada componente do estado atual no AFND
-            for estado in estadosVerificar:
-                if estado in delta and simbolo in delta[estado]:
-                    novoEstado.update(delta[estado][simbolo])
+            for estado in estadosAtuais:
+                if simbolo in delta[estado]:
+                    for proximoEstado in delta[estado][simbolo]:
+                        #Valida as transições epsilon do estado atual
+                        novosEstados.update(fechoEpsilon(proximoEstado))
 
             # Caso não tenha nenhum estado no set novoEstado pulamos o processamento do simbolo
-            if len(novoEstado) == 0:
+            if len(novosEstados) == 0:
                 continue
 
-            # Gerar o novo estado juntando as todos os simbolos por "_"
-            novoEstado = '_'.join(sorted(novoEstado))
-
-            # Se o novo estado for válido e ainda não estiver adicionado vai adicionar o mesmo a lista de estados e a fila para ser processado
-            if novoEstado and novoEstado not in estados:
-                estados.append(novoEstado)
-                fila.append(novoEstado)
+            # Gerar o novo estado juntando por "_"
+            novoEstado = '_'.join(sorted(novosEstados))
 
             # Se o estado atual não estiver nas transições criar um json vazio para esse estado
             if estadoAtual not in transicoes:
@@ -89,17 +105,16 @@ def convertAFNDtoAFD(caminho: str):
             # Adiciona a transição do estado atual para o novo estado com símbolo atual
             transicoes[estadoAtual][simbolo] = novoEstado
 
-            # Verifica se o novo estado contém algum estado final do AFND, se tiver adicionar o novo estado aos estados finais
-            if any(estadoFinal in novoEstado for estadoFinal in F):
-                if novoEstado not in estadosFinais:
-                    estadosFinais.append(novoEstado)
+            # Se o novo estado for válido e ainda não estiver adicionado vai adicionar o mesmo a lista de estados e a fila para ser processado
+            if novoEstado not in estados:
+                estados.append(novoEstado)
+                fila.append(novoEstado)
 
-    # Gerar o json do AFD
     afd = {
         "V": list(simbolos),
         "Q": estados,
         "delta": transicoes,
-        "q0": estadoInicial,
+        "q0": '_'.join(estadosIniciais), # O novo estado inicial caso o afnd comece por um epsilon pode ser diferente
         "F": estadosFinais
     }
 
