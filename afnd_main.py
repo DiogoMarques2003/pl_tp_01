@@ -70,6 +70,10 @@ def convertAFNDtoAFD(caminho: str):
                 if estado in delta and simbolo in delta[estado]:
                     novoEstado.update(delta[estado][simbolo])
 
+            # Caso não tenha nenhum estado no set novoEstado pulamos o processamento do simbolo
+            if len(novoEstado) == 0:
+                continue
+
             # Gerar o novo estado juntando as todos os simbolos por "_"
             novoEstado = '_'.join(sorted(novoEstado))
 
