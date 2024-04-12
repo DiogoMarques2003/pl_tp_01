@@ -42,20 +42,25 @@ F = set(afnd["F"])
 
 # Suporte para epsilion
 def fechoEpsilon(estado):
+    # Iniciar um array que vai conter os estados alcançáveis por epsilon
     fecho = [estado]
+    # Fila para controlar os estados a explorar para encontrar os estados alcançáveis por epsilon
     fila = [estado]
 
-    print(estado)
-
+    # Enquanto a fila não estiver vazia
     while len(fila) != 0:
+        # Pegar no ultimo elemento do array
         estadoAtual = fila.pop()
-        # Processar a transição epsilon do estado atual
+        # validar se existem transições epsilon para o estado atual
         if '' in delta[estadoAtual]:
+            # Percorre os estados alcançáveis por epsilon
             for proximoEstado in delta[estadoAtual]['']:
+                # Se o estado não estiver no fecho adiciona ao fecho e a fila para "explorar"
                 if proximoEstado not in fecho:
                     fecho.append(proximoEstado)
                     fila.append(proximoEstado)
     
+    # Retorna o fecho epsilon (array com todos os estados alcançáveis por epsilon)
     return fecho
 
 
@@ -73,10 +78,12 @@ def convertAFNDtoAFD(caminho: str):
     fila = ['_'.join(sorted(estadosIniciais))]
 
     while len(fila) != 0:
-        estadoAtual = fila.pop()
+        # Pegar no ultimo elemento do array
+        estadoAtual = fila.pop() 
+        # Separar o estado por "_" para obter todos os estados que geram o mesmo
         estadosAtuais = estadoAtual.split('_')
 
-        # Verificar se algum estado atual é estado final do AFND
+        # Verificar se algum estado atual é estado final do AFND, se for adiciona o novo estado aos estados finais do AFD
         if any(f in estadosAtuais for f in F):
             if estadoAtual not in estadosFinais:
                 estadosFinais.append(estadoAtual)
