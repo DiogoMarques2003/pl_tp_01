@@ -69,13 +69,15 @@ def convertAFNDtoAFD(caminho: str):
     # Iniciar as variáveis para construir o AFD
     simbolos = V # Símbolos do alfabeto
     estadoInicial = q0 # Estado inicial
-    estados = [estadoInicial] # Listado dos estados
+    estados = [] # Listado dos estados
     transicoes = {} # Transições que constituem o AFD
     estadosFinais = [] # Lista dos estados finais
 
     # Usa uma fila para controlar os estados a serem processados
     estadosIniciais = fechoEpsilon(estadoInicial)
     fila = ['_'.join(sorted(estadosIniciais))]
+    # Adiciona o estado inicial ao AFD, como com o fecho eplison pode ser diferente ordenamos e fazemos o join dos estados retornados pelo fecho epsilon
+    estados.append('_'.join(sorted(estadosIniciais)))
 
     while len(fila) != 0:
         # Pegar no ultimo elemento do array
