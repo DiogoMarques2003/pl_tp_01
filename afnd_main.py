@@ -62,7 +62,7 @@ def convertAFNDtoAFD(caminho: str):
         for simbolo in simbolos:
             # Conjunto para armazenar os estados utilizados pelo símbolo atual
             novoEstado = set()
-            # Divide o estado atual nos seus componentes, por ex se tivermos o estado q1,q2 vamos ter os componentes q1 e q2
+            # Divide o estado atual nos seus componentes, por ex se tivermos o estado q1_q2 vamos ter os componentes q1 e q2
             estadosVerificar = estadoAtual.split('_')
 
             # Verifica as transições para cada componente do estado atual no AFND
@@ -70,7 +70,7 @@ def convertAFNDtoAFD(caminho: str):
                 if estado in delta and simbolo in delta[estado]:
                     novoEstado.update(delta[estado][simbolo])
 
-            # Gerar o novo estado juntando as todos os simbolos por ","
+            # Gerar o novo estado juntando as todos os simbolos por "_"
             novoEstado = '_'.join(sorted(novoEstado))
 
             # Se o novo estado for válido e ainda não estiver adicionado vai adicionar o mesmo a lista de estados e a fila para ser processado
